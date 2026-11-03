@@ -1,0 +1,35 @@
+{
+  "_说明": "副图公式清单。这是示例文件（公开的教科书指标）；你自己的公式写进 formulas.json（同目录，已被 .gitignore 忽略），格式一样：名称 + 公式。",
+  "items": [
+    {
+      "name": "价格偏离 20 日均线（%）",
+      "formula": "(CLOSE - MA(CLOSE,20)) / MA(CLOSE,20) * 100",
+      "hint": "0 轴上方=在均线上方；柱子越长说明偏离越大"
+    },
+    {
+      "name": "量比（5 日）",
+      "formula": "VOLUME / MA(VOLUME,5)",
+      "hint": "1 以上=比前 5 天平均放量"
+    },
+    {
+      "name": "10 日动量（%）",
+      "formula": "(CLOSE - REF(CLOSE,10)) / REF(CLOSE,10) * 100",
+      "hint": "经典动量：正=近 10 日在涨"
+    },
+    {
+      "name": "双均线差（EMA12 − EMA26）",
+      "formula": "EMA(CLOSE,12) - EMA(CLOSE,26)",
+      "hint": "MACD 快线，看零轴上下与拐头"
+    },
+    {
+      "name": "20 日波动率（%）",
+      "formula": "STD(CLOSE,20) / MA(CLOSE,20) * 100",
+      "hint": "数值越大，这票最近越颠"
+    },
+    {
+      "name": "20 日新高标记",
+      "formula": "CROSS(CLOSE, HHV(CLOSE,20))",
+      "hint": "1=当天收盘创 20 日新高"
+    }
+  ]
+}

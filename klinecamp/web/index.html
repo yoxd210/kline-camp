@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>K线训练营</title>
+<link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">K线训练营 <span class="ver">v0.1</span></div>
+  <div class="modes">
+    <button id="btnBlind" class="primary">开一局（盲盒）</button>
+    <span class="sep"></span>
+    <select id="condSelect" title="先按条件筛，再从命中里随机抽一只"></select>
+    <button id="btnScreen">按条件抽一局</button>
+    <span class="sep"></span>
+    <input id="codeInput" placeholder="代码，如 600519" maxlength="6" />
+    <button id="btnCustom">指定这只练</button>
+    <span class="meta" id="metaLine">读取数据…</span>
+  </div>
+</header>
+
+<main>
+  <section class="chart-panel">
+    <div class="case-line">
+      <b id="caseName">还没开局</b>
+      <span class="meta" id="caseInfo"></span>
+      <button id="btnResetLayout" class="ghost tiny" title="把主图/副图高度和图表宽度恢复默认">恢复默认布局</button>
+      <span class="date-badge" id="nowDate">—</span>
+    </div>
+
+    <div class="stack" id="stack">
+      <div class="pane pane-main">
+        <div class="legend" id="legMain"><b>K线</b><span class="lg"></span></div>
+        <div id="chart"></div>
+      </div>
+      <div class="grip" data-grip="main" title="拖动调节主图高度"></div>
+      <div class="pane">
+        <div class="legend" id="legVol"><b>成交量</b><span class="lg"></span></div>
+        <div id="volChart"></div>
+      </div>
+      <div class="pane">
+        <div class="legend" id="legMacd"><b>MACD(12,26,9)</b><span class="lg"></span></div>
+        <div id="macdChart"></div>
+      </div>
+      <div class="grip" data-grip="panel" title="拖动调节所有副图的高度"></div>
+      <div id="formulaRows"></div>
+    </div>
+  </section>
+
+  <div class="vdiv" id="vdiv" title="拖动调节图表宽度"></div>
+
+  <aside class="side">
+    <div class="card">
+      <div class="k">总资产</div>
+      <div class="v" id="equity">—</div>
+      <div class="sub" id="retLine">收益率 —</div>
+    </div>
+
+    <div class="card grid2">
+      <div><div class="k">现金</div><div class="v2" id="cash">—</div></div>
+      <div><div class="k">持仓</div><div class="v2" id="shares">—</div></div>
+      <div><div class="k">成本</div><div class="v2" id="cost">—</div></div>
+      <div><div class="k">市值</div><div class="v2" id="mv">—</div></div>
+      <div><div class="k">现价</div><div class="v2" id="price">—</div></div>
+      <div><div class="k">已成交</div><div class="v2" id="tradeCount">0</div></div>
+    </div>
+
+    <div class="card">
+      <div class="k">下单（下一根开盘成交）</div>
+      <div class="order">
+        <input id="shareInput" type="number" value="100" step="100" min="100" />
+        <button id="btnBuy" class="up">买入</button>
+        <button id="btnSell" class="down">卖出</button>
+        <button id="btnHold" class="ghost" title="这一根不操作，直接走下一根">持仓不动</button>
+      </div>
+      <div class="meta" id="pendingLine"></div>
+      <div class="msg" id="msg"></div>
+    </div>
+
+    <div class="card">
+      <div class="k">回放</div>
+      <div class="playrow">
+        <button id="btnPlay">▶ 自动播放</button>
+        <select id="speed">
+          <option value="1200">慢（1.2 秒/根）</option>
+          <option value="600" selected>中（0.6 秒/根）</option>
+          <option value="250">快（0.25 秒/根）</option>
+        </select>
+      </div>
+      <div class="meta">快捷键：空格 播放/暂停 · B 买 100 股 · S 卖 100 股</div>
+    </div>
+
+    <div class="card">
+      <button id="btnFinish" class="ghost wide">结算这一局</button>
+      <div class="meta">结束后揭晓是哪只票，并给出「你 vs 买入持有 vs MA20 纪律」的对比。</div>
+    </div>
+
+    <div class="card">
+      <button id="btnFormulaMgr" class="ghost wide">公式管理</button>
+      <div class="meta">副图指标都在这里加（名称 + 公式）</div>
+    </div>
+
+    <div class="card">
+      <div class="k">训练记录</div>
+      <div id="history" class="history"><span class="meta">加载中…</span></div>
+    </div>
+  </aside>
+</main>
+
+<footer class="footer">
+  本项目仅供个人研究与学习，不构成任何投资建议 · 数据来自第三方接口，可能存在缺失或延迟 · 据此交易，风险自负
+</footer>
+
+<!-- 公式管理 -->
+<div class="modal hidden" id="fmModal">
+  <div class="modal-mask" id="fmMask"></div>
+  <div class="modal-body">
+    <div class="modal-head">
+      <b>公式管理 · 副图指标</b>
+      <button class="close" id="fmClose">×</button>
+    </div>
+
+    <div class="fm-sec">
+      <div class="fm-title">显示哪些副图（最多 3 个）</div>
+      <div id="fmShow" class="fm-show"></div>
+      <div class="meta">勾选后会出现在 K 线下面；成交量和 MACD 是固定的，不用选。</div>
+    </div>
+
+    <div class="fm-sec">
+      <div class="fm-title">新增 / 修改公式</div>
+      <div class="fm-form">
+        <input id="fmName" placeholder="名称，如：我的量价背离" />
+        <input id="fmHint" placeholder="说明（可选）" />
+        <textarea id="fmFormula" rows="3" spellcheck="false"
+          placeholder="公式，例如：(CLOSE - MA(CLOSE,20)) / MA(CLOSE,20) * 100"></textarea>
+        <div class="fm-actions">
+          <button id="fmSave" class="primary">保存到 formulas.json</button>
+          <button id="fmTest" class="ghost">试算</button>
+          <span class="meta" id="fmMsg"></span>
+        </div>
+      </div>
+      <div class="meta" id="fmHelp">
+        可用：CLOSE OPEN HIGH LOW VOLUME AMOUNT · MA/EMA/REF/SUM/HHV/LLV/STD/MAX/MIN/ABS/CROSS
+      </div>
+    </div>
+
+    <div class="fm-sec">
+      <div class="fm-title">全部公式</div>
+      <div id="fmList" class="fm-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 结算 -->
+<div class="modal hidden" id="resultModal">
+  <div class="modal-mask" id="resultMask"></div>
+  <div class="modal-body">
+    <div class="modal-head">
+      <b id="resultTitle">本局结果</b>
+      <button class="close" id="resultClose">×</button>
+    </div>
+    <div id="resultBody"></div>
+  </div>
+</div>
+
+<script src="/static/vendor/lightweight-charts.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>

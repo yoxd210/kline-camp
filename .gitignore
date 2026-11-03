@@ -1,0 +1,25 @@
+__pycache__/
+*.pyc
+.venv/
+data/
+demo-data/
+output/
+*.sqlite3
+.DS_Store
+
+# 行情数据一律不进库
+*.parquet
+*.csv
+*.feather
+*.jsonl
+
+# 本地截图
+shot_*.png
+
+*.log
+
+# 自己的副图公式（可能含私有指标）
+formulas.json
+
+# 拖出来的界面布局
+layout.json

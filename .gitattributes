@@ -1,0 +1,8 @@
+# 统一换行：仓库里一律 LF；Windows 批处理用 CRLF；二进制别乱转
+* text=auto eol=lf
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+*.png binary
+*.jpg binary
+*.parquet binary
+*.sqlite3 binary
